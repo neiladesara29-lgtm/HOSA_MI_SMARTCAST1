@@ -474,7 +474,7 @@ body.light .btn-cancel:hover{color:#0d2035;}
         <div class="grid-4">
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Moisture</span>
+              <span class="card-title">Humidity</span>
               <span style="font-size:1.2rem">💧</span>
             </div>
             <div class="card-value good" id="m-moisture">18%</div>
@@ -483,7 +483,7 @@ body.light .btn-cancel:hover{color:#0d2035;}
           </div>
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Pressure</span>
+              <span class="card-title">Atmospheric Pressure</span>
               <span style="font-size:1.2rem">⊕</span>
             </div>
             <div class="card-value good" id="m-pressure">42 mmHg</div>
@@ -492,7 +492,7 @@ body.light .btn-cancel:hover{color:#0d2035;}
           </div>
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Temperature</span>
+              <span class="card-title">Room Temp</span>
               <span style="font-size:1.2rem">🌡</span>
             </div>
             <div class="card-value good" id="m-temp">34.2°C</div>
@@ -589,8 +589,8 @@ body.light .btn-cancel:hover{color:#0d2035;}
               <span class="card-title">24-Hour Sensor Overview</span>
               <div style="display:flex;gap:0.75rem;font-size:0.62rem;font-family:var(--font-mono);">
                 <span style="color:var(--teal2)">— Pressure</span>
-                <span style="color:var(--good)">— Moisture</span>
-                <span style="color:var(--warn)">— Temp</span>
+                <span style="color:var(--good)">— Humidity</span>
+                <span style="color:var(--warn)">— Room Temp</span>
               </div>
             </div>
             <canvas id="main-chart" style="width:100%;height:160px;display:block;"></canvas>
@@ -621,7 +621,7 @@ body.light .btn-cancel:hover{color:#0d2035;}
       <div class="view" id="page-sensors">
         <div class="grid-2">
           <div class="card">
-            <div class="card-header"><span class="card-title">Moisture Sensor</span><span class="live-badge" style="font-size:0.55rem;padding:0.15rem 0.4rem;"><div class="live-dot"></div>Live</span></div>
+            <div class="card-header"><span class="card-title">Humidity Sensor</span><span class="live-badge" style="font-size:0.55rem;padding:0.15rem 0.4rem;"><div class="live-dot"></div>Live</span></div>
             <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;color:var(--teal2);" id="s-moisture">18%</div>
             <div style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem;">Skin surface relative humidity</div>
             <div class="sensor-bar">
@@ -1000,7 +1000,7 @@ body.light .btn-cancel:hover{color:#0d2035;}
           <div class="card">
             <div class="card-header"><span class="card-title">Alert Thresholds</span></div>
             <div class="sensor-bar" style="padding:0.75rem 0;">
-              <span class="sensor-name" style="font-size:0.72rem;color:var(--white);">Moisture</span>
+              <span class="sensor-name" style="font-size:0.72rem;color:var(--white);">Humidity</span>
               <div style="flex:1;"><input type="range" min="30" max="80" value="60" style="width:100%;accent-color:var(--teal2);"></div>
               <span class="sensor-val" style="color:var(--teal2)">60%</span>
             </div>
@@ -1178,18 +1178,18 @@ const PATIENTS = [
     avatarGrad: 'linear-gradient(135deg,#1a4060,#0d9488)',
     statusLabel: 'Monitor',
     statusClass: 'warn',
-    sensors: { moisture:{val:'18%',color:'var(--good)',label:'Normal'}, pressure:{val:'58 mmHg',color:'var(--warn)',label:'Zone 3 ↑'}, temp:{val:'34.2°C',color:'var(--teal2)',label:'Normal'}, compliance:{val:'91%',color:'var(--good)',label:'Good'} },
+    sensors: { moisture:{val:'50%',color:'var(--good)',label:'Normal'}, pressure:{val:'760 mmHg',color:'var(--good)',label:'Normal'}, temp:{val:'22°C',color:'var(--teal2)',label:'Normal'}, compliance:{val:'91%',color:'var(--good)',label:'Good'} },
     zones: [{n:'Wrist',s:'ok'},{n:'Mid',s:'ok'},{n:'Elbow',s:'warn'},{n:'Top',s:'ok'},{n:'Base',s:'ok'},{n:'Outer',s:'ok'}],
     alerts: [
-      {type:'warn',icon:'⚠',title:'Pressure spike — Zone 3',desc:'Brief elevation at 58 mmHg. Pneumatic bladder vented Zone 3 pressure. Declining.',time:'14 min ago'},
+      {type:'warn',icon:'⚠',title:'Pressure fluctuation — Zone 3',desc:'Brief elevation at 762 mmHg. Atmospheric pressure adjusted. Declining.',time:'14 min ago'},
       {type:'good',icon:'✓',title:'Fit auto-optimized',desc:'All pneumatic zones recalibrated after overnight swelling reduction.',time:'2 hrs ago'},
     ],
     notes: [
       {date:'Apr 1',text:'Healing on track. Swelling trend very positive. Keep activity minimal this week.'},
       {date:'Mar 25',text:'Peak swelling passed. Smart Cast auto-adjusted well. No complications. Schedule 2-week remote check.'},
     ],
-    pressureData: [42,44,46,50,48,45,44,58,55,50,46,44,42,43,44,42],
-    moistureData: [18,19,20,18,17,19,21,20,18,17,16,18,19,17,18,18],
+    pressureData: [755,756,757,758,759,760,761,762,763,764,765,764,763,762,761,760],
+    moistureData: [50,51,52,50,49,51,53,52,50,49,48,50,51,49,50,50],
   },
   {
     id: 1,
@@ -1204,18 +1204,18 @@ const PATIENTS = [
     avatarGrad: 'linear-gradient(135deg,#2d1a60,#7c3aed)',
     statusLabel: 'Good',
     statusClass: 'good',
-    sensors: { moisture:{val:'14%',color:'var(--good)',label:'Excellent'}, pressure:{val:'38 mmHg',color:'var(--good)',label:'Optimal'}, temp:{val:'33.8°C',color:'var(--good)',label:'Normal'}, compliance:{val:'98%',color:'var(--good)',label:'Excellent'} },
+    sensors: { moisture:{val:'48%',color:'var(--good)',label:'Excellent'}, pressure:{val:'758 mmHg',color:'var(--good)',label:'Optimal'}, temp:{val:'21°C',color:'var(--good)',label:'Normal'}, compliance:{val:'98%',color:'var(--good)',label:'Excellent'} },
     zones: [{n:'Wrist',s:'ok'},{n:'Mid',s:'ok'},{n:'Elbow',s:'ok'},{n:'Top',s:'ok'},{n:'Base',s:'ok'},{n:'Outer',s:'ok'}],
     alerts: [
-      {type:'good',icon:'✓',title:'7-Day skin check: Excellent',desc:'Moisture below 20% entire week. No maceration, pressure sores, or temp elevation.',time:'Today 07:00'},
+      {type:'good',icon:'✓',title:'7-Day humidity check: Excellent',desc:'Humidity within 40-60% entire week. Optimal indoor conditions maintained.',time:'Today 07:00'},
       {type:'good',icon:'✓',title:'Daily sensor check passed',desc:'All four channels nominal. Clinician dashboard updated.',time:'Today 07:00'},
     ],
     notes: [
       {date:'Mar 28',text:'Day 28 — excellent recovery trajectory. Bone density appears strong on last X-ray. Targeting cast removal by Apr 12.'},
       {date:'Mar 14',text:'Peak swelling resolved faster than expected. Patient very compliant with activity restrictions.'},
     ],
-    pressureData: [38,37,39,38,36,37,38,37,39,38,37,38,36,37,38,38],
-    moistureData: [14,15,13,14,16,14,13,14,15,13,14,14,15,14,13,14],
+    pressureData: [758,757,759,758,756,757,758,757,759,758,757,758,756,757,758,758],
+    moistureData: [48,49,47,48,50,48,47,48,49,47,48,48,49,48,47,48],
   },
   {
     id: 2,
@@ -1230,19 +1230,19 @@ const PATIENTS = [
     avatarGrad: 'linear-gradient(135deg,#601a1a,#dc2626)',
     statusLabel: 'Review',
     statusClass: 'danger',
-    sensors: { moisture:{val:'41%',color:'var(--warn)',label:'Elevated ↑'}, pressure:{val:'67 mmHg',color:'var(--danger)',label:'High!'}, temp:{val:'36.1°C',color:'var(--warn)',label:'Slightly ↑'}, compliance:{val:'62%',color:'var(--danger)',label:'Low'} },
+    sensors: { moisture:{val:'55%',color:'var(--warn)',label:'Elevated ↑'}, pressure:{val:'765 mmHg',color:'var(--danger)',label:'High!'}, temp:{val:'23.5°C',color:'var(--warn)',label:'Slightly ↑'}, compliance:{val:'62%',color:'var(--danger)',label:'Low'} },
     zones: [{n:'Wrist',s:'warn'},{n:'Mid',s:'warn'},{n:'Elbow',s:'ok'},{n:'Top',s:'ok'},{n:'Base',s:'warn'},{n:'Outer',s:'ok'}],
     alerts: [
-      {type:'danger',icon:'✕',title:'High pressure — Zone 1 & 2',desc:'Sustained pressure above 65 mmHg for 18 min. Pneumatic bladders at maximum inflation. Manual review required.',time:'32 min ago'},
-      {type:'warn',icon:'⚠',title:'Elevated moisture detected',desc:'Skin moisture at 41% — approaching maceration threshold of 60%. Monitor closely.',time:'1 hr ago'},
+      {type:'danger',icon:'✕',title:'High pressure — Zone 1 & 2',desc:'Sustained pressure above 763 mmHg for 18 min. Atmospheric conditions fluctuating. Manual review required.',time:'32 min ago'},
+      {type:'warn',icon:'⚠',title:'Elevated humidity detected',desc:'Room humidity at 55% — approaching discomfort threshold. Monitor closely.',time:'1 hr ago'},
       {type:'warn',icon:'⚑',title:'Non-compliance alert',desc:'High-impact activity detected for 22 minutes. Activity sensors flagged. Patient notified.',time:'Yesterday 16:10'},
     ],
     notes: [
       {date:'Apr 1',text:'Day 5 — peak swelling phase. Pressure elevated in zones 1 and 2. Pneumatic system struggling to compensate. Consider in-person review if pressure does not resolve by tomorrow.'},
       {date:'Mar 28',text:'Initial cast applied. Patient is 19 y/o athlete — reminded strongly about activity restrictions.'},
     ],
-    pressureData: [52,55,58,62,65,67,66,68,67,65,67,68,66,67,69,67],
-    moistureData: [28,30,33,35,37,38,39,40,39,41,40,42,41,40,41,41],
+    pressureData: [760,762,763,764,765,766,767,768,767,765,766,767,766,767,768,766],
+    moistureData: [52,53,54,55,56,57,58,59,58,60,59,61,60,59,60,60],
   },
   {
     id: 3,
@@ -1257,18 +1257,18 @@ const PATIENTS = [
     avatarGrad: 'linear-gradient(135deg,#1a5060,#0891b2)',
     statusLabel: 'Good',
     statusClass: 'good',
-    sensors: { moisture:{val:'16%',color:'var(--good)',label:'Normal'}, pressure:{val:'40 mmHg',color:'var(--good)',label:'Optimal'}, temp:{val:'34.0°C',color:'var(--good)',label:'Normal'}, compliance:{val:'95%',color:'var(--good)',label:'Excellent'} },
+    sensors: { moisture:{val:'45%',color:'var(--good)',label:'Normal'}, pressure:{val:'759 mmHg',color:'var(--good)',label:'Optimal'}, temp:{val:'21.5°C',color:'var(--good)',label:'Normal'}, compliance:{val:'95%',color:'var(--good)',label:'Excellent'} },
     zones: [{n:'Wrist',s:'ok'},{n:'Mid',s:'ok'},{n:'Elbow',s:'ok'},{n:'Top',s:'ok'},{n:'Base',s:'ok'},{n:'Outer',s:'ok'}],
     alerts: [
-      {type:'good',icon:'✓',title:'Week 5 check: All clear',desc:'Pressure, moisture, and temperature all within optimal ranges throughout week 5.',time:'Today 08:00'},
+      {type:'good',icon:'✓',title:'Week 5 check: All clear',desc:'Pressure, humidity, and temperature all within optimal ranges throughout week 5.',time:'Today 08:00'},
       {type:'good',icon:'✓',title:'Pneumatic system recalibrated',desc:'Minor overnight adjustment — minor pressure increase as swelling resolved.',time:'Yesterday 03:12'},
     ],
     notes: [
       {date:'Mar 30',text:'Week 5 — scaphoid fractures heal slowly but sensors indicate excellent progress. No avascular necrosis signs. On track for week 8 removal.'},
       {date:'Mar 16',text:'Scaphoid confirmed on MRI. Cast applied. Long healing window expected (6-8 weeks). Remote monitoring especially valuable for this patient given distance from clinic.'},
     ],
-    pressureData: [40,41,40,39,40,41,40,39,40,41,40,40,39,40,41,40],
-    moistureData: [16,17,16,15,16,17,16,15,16,17,16,16,15,16,17,16],
+    pressureData: [759,760,759,758,759,760,759,758,759,760,759,759,758,759,760,759],
+    moistureData: [45,46,45,44,45,46,45,44,45,46,45,45,44,45,46,45],
   },
 ];
 
@@ -1493,9 +1493,9 @@ function makeLineChart(id, datasets, labels){
 // Generate fake data
 function gen(base,variance,n){return Array.from({length:n},()=>+(base+(Math.random()-0.5)*variance*2).toFixed(1));}
 
-const moistureData=gen(18,4,24);
-const pressureData=gen(42,8,24);
-const tempData=gen(34.2,0.5,24);
+const moistureData=gen(50,4,24);
+const pressureData=gen(760,8,24);
+const tempData=gen(22,1,24);
 const movData=gen(10,5,24);
 const swellData=[85,82,80,76,72,68,65,62,60,58,55,52].map(v=>+(v+Math.random()*2).toFixed(1));
 
@@ -1615,9 +1615,9 @@ window.addEventListener('hashchange', handleHash);
 let tick=0;
 setInterval(()=>{
   tick++;
-  const moisture=+(16+Math.sin(tick*0.1)*3+Math.random()*2).toFixed(1);
-  const pressure=+(42+Math.sin(tick*0.07)*5+Math.random()*4).toFixed(0);
-  const temp=+(34.2+Math.sin(tick*0.05)*0.4+Math.random()*0.2).toFixed(1);
+  const moisture=+(50+Math.sin(tick*0.1)*3+Math.random()*2).toFixed(1);
+  const pressure=+(760+Math.sin(tick*0.07)*5+Math.random()*4).toFixed(0);
+  const temp=+(22+Math.sin(tick*0.05)*1+Math.random()*0.5).toFixed(1);
   const z3=+(54+Math.sin(tick*0.08)*6+Math.random()*4).toFixed(0);
 
   // dashboard values
