@@ -1001,18 +1001,18 @@ body.light .btn-cancel:hover{color:#0d2035;}
             <div class="card-header"><span class="card-title">Alert Thresholds</span></div>
             <div class="sensor-bar" style="padding:0.75rem 0;">
               <span class="sensor-name" style="font-size:0.72rem;color:var(--white);">Humidity</span>
-              <div style="flex:1;"><input type="range" min="30" max="80" value="60" style="width:100%;accent-color:var(--teal2);"></div>
-              <span class="sensor-val" style="color:var(--teal2)">60%</span>
+              <div style="flex:1;"><input type="range" id="humidity-threshold" min="40" max="70" value="55" style="width:100%;accent-color:var(--teal2);" onchange="updateThreshold('humidity-threshold', 'humidity-val')"></div>
+              <span class="sensor-val" id="humidity-val" style="color:var(--teal2)">55%</span>
             </div>
             <div class="sensor-bar" style="padding:0.75rem 0;">
               <span class="sensor-name" style="font-size:0.72rem;color:var(--white);">Pressure</span>
-              <div style="flex:1;"><input type="range" min="40" max="100" value="50" style="width:100%;accent-color:var(--teal2);"></div>
-              <span class="sensor-val" style="color:var(--teal2)">50 mmHg</span>
+              <div style="flex:1;"><input type="range" id="pressure-threshold" min="750" max="770" value="760" style="width:100%;accent-color:var(--teal2);" onchange="updateThreshold('pressure-threshold', 'pressure-val')"></div>
+              <span class="sensor-val" id="pressure-val" style="color:var(--teal2)">760 mmHg</span>
             </div>
             <div class="sensor-bar" style="padding:0.75rem 0;">
               <span class="sensor-name" style="font-size:0.72rem;color:var(--white);">Temperature</span>
-              <div style="flex:1;"><input type="range" min="35" max="40" value="37" style="width:100%;accent-color:var(--teal2);"></div>
-              <span class="sensor-val" style="color:var(--teal2)">37°C</span>
+              <div style="flex:1;"><input type="range" id="temp-threshold" min="20" max="25" value="22" style="width:100%;accent-color:var(--teal2);" onchange="updateThreshold('temp-threshold', 'temp-val')"></div>
+              <span class="sensor-val" id="temp-val" style="color:var(--teal2)">22°C</span>
             </div>
           </div>
 
@@ -1144,6 +1144,46 @@ function switchPage(id){
     document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.vt-btn[onclick*="patient"]').classList.add('active');
   }
+}
+
+// ── THRESHOLD SLIDERS ──
+function updateThreshold(sliderId, valId) {
+  const slider = document.getElementById(sliderId);
+  const val = document.getElementById(valId);
+  if (slider && val) {
+    const value = slider.value;
+    if (sliderId === 'humidity-threshold') {
+      val.textContent = value + '%';
+      localStorage.setItem('humidityThreshold', value);
+    } else if (sliderId === 'pressure-threshold') {
+      val.textContent = value + ' mmHg';
+      localStorage.setItem('pressureThreshold', value);
+    } else if (sliderId === 'temp-threshold') {
+      val.textContent = value + '°C';
+      localStorage.setItem('tempThreshold', value);
+    }
+  }
+}
+
+// Load saved thresholds on page load
+function loadThresholds() {
+  const humiditySlider = document.getElementById('humidity-threshold');
+  const humidityVal = document.getElementById('humidity-val');
+  const pressureSlider = document.getElementById('pressure-threshold');
+  const pressureVal = document.getElementById('pressure-val');
+  const tempSlider = document.getElementById('temp-threshold');
+  const tempVal = document.getElementById('temp-val');
+
+  const humidity = localStorage.getItem('humidityThreshold') || 55;
+  const pressure = localStorage.getItem('pressureThreshold') || 760;
+  const temp = localStorage.getItem('tempThreshold') || 22;
+
+  if (humiditySlider) humiditySlider.value = humidity;
+  if (humidityVal) humidityVal.textContent = humidity + '%';
+  if (pressureSlider) pressureSlider.value = pressure;
+  if (pressureVal) pressureVal.textContent = pressure + ' mmHg';
+  if (tempSlider) tempSlider.value = temp;
+  if (tempVal) tempVal.textContent = temp + '°C';
 }
 
 // ── VIEW TOGGLE ──
@@ -1609,7 +1649,10 @@ function handleHash() {
     }
   }
 }
-window.addEventListener('load', handleHash);
+window.addEventListener('load', () => {
+  handleHash();
+  loadThresholds();
+});
 window.addEventListener('hashchange', handleHash);
 
 let tick=0;
