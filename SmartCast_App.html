@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Cast — Companion App</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#06111a;
+  --bg2:#091929;
+  --bg3:#0d2035;
+  --teal:#0d9488;
+  --teal2:#2dd4bf;
+  --teal3:#99f6e4;
+  --navy:#0b2035;
+  --white:#f0faf8;
+  --muted:#6b8fa3;
+  --border:rgba(45,212,191,0.15);
+  --border2:rgba(45,212,191,0.08);
+  --warn:#f59e0b;
+  --danger:#ef4444;
+  --good:#10b981;
+  --card:rgba(13,32,53,0.8);
+  --radius:14px;
+  --font:'DM Sans',sans-serif;
+  --font-display:'Syne',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --sidebar-bg:rgba(6,17,26,0.98);
+  --topbar-bg:rgba(6,17,26,0.96);
+  --text-soft:rgba(255,255,255,0.75);
+}
+/* ── LIGHT MODE ── */
+body.light{
+  --bg:#eef6f4;
+  --bg2:#e2f0ed;
+  --bg3:#d4e9e4;
+  --white:#0d2035;
+  --muted:#3d6a72;
+  --border:rgba(13,148,136,0.2);
+  --border2:rgba(13,148,136,0.1);
+  --card:rgba(255,255,255,0.9);
+  --sidebar-bg:rgba(255,255,255,0.98);
+  --topbar-bg:rgba(238,246,244,0.97);
+  --text-soft:rgba(13,32,53,0.75);
+}
+body.light #sidebar{background:var(--sidebar-bg);border-right:1px solid var(--border);}
+body.light #topbar{background:var(--topbar-bg);border-bottom:1px solid var(--border);}
+body.light .sb-btn{color:#3d6a72;}
+body.light .sb-btn:hover{background:rgba(13,148,136,0.08);color:var(--teal);}
+body.light .sb-btn.active{background:rgba(13,148,136,0.12);color:var(--teal);}
+body.light .sb-btn.active::before{background:var(--teal);}
+body.light .card{background:rgba(255,255,255,0.92);border-color:rgba(13,148,136,0.12);box-shadow:0 1px 6px rgba(0,0,0,0.06);}
+body.light .pat-name{color:#0d2035;}
+body.light .alert-title{color:#0d2035;}
+body.light .tl-label{color:#0d2035;}
+body.light .setting-label{color:#0d2035;}
+body.light .prog-bar{background:#c8deda;}
+body.light .sensor-track{background:#c8deda;}
+body.light #content{background:var(--bg);}
+body.light textarea{background:#e2f0ed !important;color:#0d2035 !important;border-color:rgba(13,148,136,0.2) !important;}
+body.light .view-toggle{background:var(--bg3);}
+body.light .zone.ok{background:rgba(16,185,129,0.1);}
+body.light .zone.warn{background:rgba(245,158,11,0.1);}
+body.light .patient-row:hover{background:rgba(13,148,136,0.06);}
+body.light .patient-row.selected{background:rgba(13,148,136,0.1);border-color:var(--teal);}
+body.light .sb-logo{box-shadow:0 0 16px rgba(13,148,136,0.2);}
+body.light .alert-item.warn{background:rgba(245,158,11,0.06);}
+body.light .alert-item.good{background:rgba(16,185,129,0.05);}
+body.light .alert-item.danger{background:rgba(239,68,68,0.05);}
+
+html,body{width:100%;height:100%;background:var(--bg);color:var(--white);font-family:var(--font);overflow:hidden;transition:background 0.25s,color 0.25s;}
+
+/* ── EDIT MODAL ── */
+#edit-modal{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+}
+#edit-modal.open{display:flex;}
+.modal-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:16px;padding:1.75rem;width:480px;max-width:95vw;
+  box-shadow:0 24px 80px rgba(0,0,0,0.5);
+}
+body.light .modal-box{background:#fff;border-color:var(--border);}
+.modal-title{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
+  color:var(--white);margin-bottom:1.25rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+body.light .modal-title{color:#0d2035;}
+.modal-close{
+  background:none;border:none;color:var(--muted);
+  font-size:1.1rem;cursor:pointer;line-height:1;
+}
+.modal-close:hover{color:var(--white);}
+body.light .modal-close:hover{color:#0d2035;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;}
+.form-group{display:flex;flex-direction:column;gap:0.3rem;}
+.form-group label{font-size:0.65rem;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.form-group input,.form-group select{
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--white);border-radius:8px;padding:0.5rem 0.75rem;
+  font-size:0.8rem;font-family:var(--font);outline:none;
+  transition:border-color 0.2s;
+}
+body.light .form-group input,body.light .form-group select{background:#e2f0ed;color:#0d2035;border-color:rgba(13,148,136,0.2);}
+.form-group input:focus,.form-group select:focus{border-color:var(--teal2);}
+.modal-actions{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.25rem;}
+.btn-save{background:var(--teal);border:none;color:#fff;padding:0.5rem 1.25rem;border-radius:8px;font-size:0.78rem;cursor:pointer;font-family:var(--font);font-weight:600;}
+.btn-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;cursor:pointer;font-family:var(--font);}
+.btn-cancel:hover{color:var(--white);}
+body.light .btn-cancel:hover{color:#0d2035;}
+
+/* ── LAYOUT ── */
+#root{display:flex;height:100vh;width:100vw;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  width:72px;flex-shrink:0;
+  background:rgba(6,17,26,0.98);
+  border-right:1px solid var(--border2);
+  display:flex;flex-direction:column;align-items:center;
+  padding:1.25rem 0;gap:0.25rem;
+  z-index:50;
+}
+.sb-logo{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg,var(--teal),var(--teal2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:800;font-size:1rem;
+  color:#fff;margin-bottom:1.25rem;letter-spacing:-0.03em;
+  box-shadow:0 0 20px rgba(45,212,191,0.3);
+}
+.sb-nav{
+  display:flex;flex-direction:column;gap:0.25rem;width:100%;
+  align-items:center;flex:1;
+}
+.sb-btn{
+  width:48px;height:48px;border-radius:12px;border:none;
+  background:transparent;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  cursor:pointer;transition:all 0.2s;font-size:1.15rem;
+  position:relative;
+}
+.sb-btn span{font-size:0.42rem;letter-spacing:0.05em;text-transform:uppercase;font-family:var(--font-mono);line-height:1;}
+.sb-btn:hover{background:rgba(45,212,191,0.08);color:var(--teal2);}
+.sb-btn.active{background:rgba(45,212,191,0.12);color:var(--teal2);}
+.sb-btn.active::before{
+  content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:24px;background:var(--teal2);border-radius:0 3px 3px 0;
+}
+.sb-badge{
+  position:absolute;top:6px;right:6px;
+  background:var(--danger);color:#fff;
+  width:16px;height:16px;border-radius:50%;
+  font-size:0.55rem;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-weight:500;
+}
+.sb-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#1a4060,#0d9488);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:600;color:#fff;
+  border:2px solid var(--border);margin-top:auto;
+}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── TOP BAR ── */
+#topbar{
+  height:56px;flex-shrink:0;
+  background:rgba(6,17,26,0.96);
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;padding:0 1.5rem;gap:1rem;
+  backdrop-filter:blur(10px);
+}
+#topbar h1{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
+  color:var(--white);letter-spacing:-0.01em;flex:1;
+}
+.view-toggle{
+  display:flex;background:var(--bg3);border-radius:8px;padding:3px;
+  border:1px solid var(--border2);
+}
+.vt-btn{
+  padding:0.3rem 0.9rem;border-radius:6px;border:none;
+  background:transparent;color:var(--muted);
+  font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.08em;
+  text-transform:uppercase;cursor:pointer;transition:all 0.2s;
+}
+.vt-btn.active{background:var(--teal);color:#fff;}
+.status-pill{
+  display:flex;align-items:center;gap:0.4rem;
+  background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);
+  border-radius:20px;padding:0.25rem 0.75rem;
+  font-size:0.7rem;color:var(--good);font-family:var(--font-mono);
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.6;transform:scale(0.85);}}
+
+/* ── CONTENT ── */
+#content{flex:1;overflow-y:auto;padding:1.5rem;display:grid;gap:1rem;}
+#content::-webkit-scrollbar{width:4px;}
+#content::-webkit-scrollbar-track{background:transparent;}
+#content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:contents;}
+
+/* ── CARDS ── */
+.card{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:1.25rem;
+  backdrop-filter:blur(8px);
+}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1rem;
+}
+.card-title{
+  font-family:var(--font-mono);font-size:0.62rem;
+  letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);
+}
+.card-value{
+  font-family:var(--font-display);font-size:2rem;font-weight:700;
+  line-height:1;color:var(--white);
+}
+.card-value.good{color:var(--good);}
+.card-value.warn{color:var(--warn);}
+.card-value.danger{color:var(--danger);}
+.card-sub{font-size:0.72rem;color:var(--muted);margin-top:0.25rem;}
+
+/* ── GRID LAYOUTS ── */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:1rem;}
+.grid-1-2{display:grid;grid-template-columns:1fr 2fr;gap:1rem;}
+
+/* ── GAUGE ── */
+.gauge-wrap{position:relative;width:100%;padding-bottom:60%;overflow:visible;}
+.gauge-wrap svg{position:absolute;top:0;left:0;width:100%;height:100%;}
+
+/* ── SPARKLINE ── */
+.spark-wrap{width:100%;height:44px;margin-top:0.5rem;}
+.spark-wrap svg{width:100%;height:100%;}
+
+/* ── ALERT ITEMS ── */
+.alert-item{
+  display:flex;gap:0.75rem;align-items:flex-start;
+  padding:0.75rem;border-radius:10px;margin-bottom:0.5rem;
+  border:1px solid transparent;
+}
+.alert-item.warn{background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);}
+.alert-item.good{background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.15);}
+.alert-item.danger{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2);}
+.alert-icon{font-size:1rem;flex-shrink:0;margin-top:0.1rem;}
+.alert-title{font-size:0.8rem;font-weight:600;color:var(--white);margin-bottom:0.15rem;}
+.alert-desc{font-size:0.72rem;color:var(--muted);line-height:1.5;}
+.alert-time{font-family:var(--font-mono);font-size:0.58rem;color:var(--muted);margin-top:0.25rem;}
+
+/* ── HEALING TIMELINE ── */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:1rem;position:relative;}
+.tl-item:not(:last-child)::before{
+  content:'';position:absolute;left:15px;top:32px;bottom:0;
+  width:1px;background:var(--border2);
+}
+.tl-dot{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;flex-shrink:0;margin-top:4px;
+  border:2px solid transparent;
+}
+.tl-dot.done{background:rgba(16,185,129,0.15);border-color:var(--good);color:var(--good);}
+.tl-dot.active{background:rgba(45,212,191,0.15);border-color:var(--teal2);color:var(--teal2);animation:pulse 2s infinite;}
+.tl-dot.pending{background:rgba(107,143,163,0.1);border-color:var(--border);color:var(--muted);}
+.tl-body{padding:0.5rem 0 1.25rem;}
+.tl-label{font-size:0.82rem;font-weight:600;color:var(--white);}
+.tl-date{font-family:var(--font-mono);font-size:0.6rem;color:var(--muted);margin-top:0.15rem;}
+.tl-note{font-size:0.72rem;color:var(--muted);margin-top:0.25rem;line-height:1.5;}
+
+/* ── PROGRESS BAR ── */
+.prog-bar{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:0.5rem;}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--teal),var(--teal2));transition:width 1s ease;}
+
+/* ── SENSOR BAR ── */
+.sensor-bar{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.6rem 0;border-bottom:1px solid var(--border2);
+}
+.sensor-bar:last-child{border-bottom:none;}
+.sensor-name{font-size:0.72rem;color:var(--muted);width:90px;flex-shrink:0;font-family:var(--font-mono);}
+.sensor-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.sensor-fill{height:100%;border-radius:3px;transition:width 0.8s ease;}
+.sensor-fill.good{background:var(--good);}
+.sensor-fill.warn{background:var(--warn);}
+.sensor-fill.danger{background:var(--danger);}
+.sensor-val{font-family:var(--font-mono);font-size:0.65rem;width:50px;text-align:right;flex-shrink:0;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:0.25rem;margin-bottom:1rem;border-bottom:1px solid var(--border2);padding-bottom:0.5rem;}
+.tab-btn{
+  padding:0.4rem 0.9rem;border-radius:6px;border:none;
+  background:transparent;color:var(--muted);
+  font-size:0.72rem;font-weight:500;cursor:pointer;transition:all 0.2s;
+  font-family:var(--font);
+}
+.tab-btn.active{background:rgba(45,212,191,0.12);color:var(--teal2);}
+.tab-btn:hover{color:var(--white);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── PATIENT LIST ── */
+.patient-row{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.75rem;border-radius:10px;cursor:pointer;
+  border:1px solid transparent;transition:all 0.2s;margin-bottom:0.35rem;
+}
+.patient-row:hover{background:rgba(45,212,191,0.05);border-color:var(--border);}
+.patient-row.selected{background:rgba(45,212,191,0.08);border-color:var(--teal2);}
+.pat-avatar{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0;
+}
+.pat-name{font-size:0.82rem;font-weight:600;color:var(--white);}
+.pat-sub{font-size:0.68rem;color:var(--muted);}
+.pat-status{margin-left:auto;font-size:0.65rem;padding:0.2rem 0.55rem;border-radius:20px;font-family:var(--font-mono);}
+.pat-status.good{background:rgba(16,185,129,0.12);color:var(--good);}
+.pat-status.warn{background:rgba(245,158,11,0.12);color:var(--warn);}
+.pat-status.danger{background:rgba(239,68,68,0.12);color:var(--danger);}
+
+/* ── CHART CANVAS ── */
+.chart-canvas{width:100%;height:140px;margin-top:0.5rem;}
+
+/* ── NOTIFICATION BADGE ── */
+.notif-count{
+  background:var(--danger);color:#fff;
+  font-size:0.6rem;padding:0.1rem 0.35rem;border-radius:10px;
+  font-family:var(--font-mono);margin-left:0.35rem;
+}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-switch{position:relative;display:inline-block;width:36px;height:20px;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{
+  position:absolute;inset:0;background:var(--bg3);border-radius:20px;
+  cursor:pointer;transition:0.3s;border:1px solid var(--border);
+}
+.toggle-slider::before{
+  content:'';position:absolute;width:14px;height:14px;
+  left:2px;top:2px;background:var(--muted);border-radius:50%;transition:0.3s;
+}
+.toggle-switch input:checked + .toggle-slider{background:var(--teal);}
+.toggle-switch input:checked + .toggle-slider::before{transform:translateX(16px);background:#fff;}
+
+/* ── SETTINGS ROW ── */
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.75rem 0;border-bottom:1px solid var(--border2);
+}
+.setting-row:last-child{border-bottom:none;}
+.setting-label{font-size:0.82rem;color:var(--white);}
+.setting-sub{font-size:0.68rem;color:var(--muted);margin-top:0.15rem;}
+
+/* ── MAP PLACEHOLDER ── */
+.body-map{
+  width:100%;aspect-ratio:1.6;
+  background:var(--bg3);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;border:1px solid var(--border2);
+}
+
+/* ── LIVE INDICATOR ── */
+.live-badge{
+  display:inline-flex;align-items:center;gap:0.35rem;
+  background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);
+  border-radius:20px;padding:0.2rem 0.6rem;
+  font-size:0.6rem;color:#f87171;font-family:var(--font-mono);
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite;}
+
+/* ── BIG STAT ── */
+.big-stat{text-align:center;padding:1rem 0;}
+.big-stat .num{
+  font-family:var(--font-display);font-size:3rem;font-weight:800;
+  color:var(--teal2);line-height:1;
+}
+.big-stat .label{font-size:0.72rem;color:var(--muted);margin-top:0.35rem;}
+
+/* ── ZONE MAP ── */
+.zone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-top:0.75rem;}
+.zone{
+  border-radius:8px;padding:0.6rem;text-align:center;
+  border:1px solid transparent;
+}
+.zone.ok{background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.2);}
+.zone.warn{background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);}
+.zone-name{font-size:0.6rem;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+.zone-val{font-size:0.82rem;font-weight:600;margin-top:0.2rem;}
+.zone.ok .zone-val{color:var(--good);}
+.zone.warn .zone-val{color:var(--warn);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+.card{animation:fadeUp 0.35s ease both;}
+.card:nth-child(1){animation-delay:0.05s;}
+.card:nth-child(2){animation-delay:0.1s;}
+.card:nth-child(3){animation-delay:0.15s;}
+.card:nth-child(4){animation-delay:0.2s;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+<div id="root">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-logo">SC</div>
+    <nav class="sb-nav">
+      <button class="sb-btn active" onclick="switchPage('dashboard')" title="Dashboard">
+        <span>⬡</span><span>Home</span>
+      </button>
+      <button class="sb-btn" onclick="switchPage('sensors')" title="Sensors">
+        <span>◎</span><span>Sensors</span>
+      </button>
+      <button class="sb-btn" onclick="switchPage('healing')" title="Healing">
+        <span>↑</span><span>Healing</span>
+      </button>
+      <button class="sb-btn" onclick="switchPage('alerts')" title="Alerts" id="sb-alerts">
+        <span>⚑</span><span>Alerts</span>
+        <div class="sb-badge" id="alert-badge">2</div>
+      </button>
+      <button class="sb-btn" onclick="switchPage('clinician')" title="Clinician">
+        <span>✚</span><span>Doctor</span>
+      </button>
+      <button class="sb-btn" onclick="switchPage('settings')" title="Settings">
+        <span>⚙</span><span>Settings</span>
+      </button>
+    </nav>
+    <div class="sb-avatar">JM</div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- TOPBAR -->
+    <div id="topbar">
+      <h1 id="page-title">Dashboard</h1>
+      <div class="live-badge"><div class="live-dot"></div>Live</div>
+      <div class="view-toggle">
+        <button class="vt-btn active" onclick="switchView('patient',this)">Patient</button>
+        <button class="vt-btn" onclick="switchView('clinician-top',this)">Clinician</button>
+      </div>
+      <div class="status-pill"><div class="status-dot"></div>Cast Active · Day 12</div>
+      <button id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode" style="background:rgba(45,212,191,0.08);border:1px solid var(--border);color:var(--teal2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;">☀</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content">
+
+      <!-- ════════ DASHBOARD ════════ -->
+      <div class="view active" id="page-dashboard">
+        <!-- row 1: 4 metric cards -->
+        <div class="grid-4">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Moisture</span>
+              <span style="font-size:1.2rem">💧</span>
+            </div>
+            <div class="card-value good" id="m-moisture">18%</div>
+            <div class="card-sub">Normal range · ↓2% from yesterday</div>
+            <div class="spark-wrap"><canvas class="chart-canvas" id="spark-moisture" style="height:40px"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Pressure</span>
+              <span style="font-size:1.2rem">⊕</span>
+            </div>
+            <div class="card-value good" id="m-pressure">42 mmHg</div>
+            <div class="card-sub">Optimal range · Stable</div>
+            <div class="spark-wrap"><canvas class="chart-canvas" id="spark-pressure" style="height:40px"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Temperature</span>
+              <span style="font-size:1.2rem">🌡</span>
+            </div>
+            <div class="card-value good" id="m-temp">34.2°C</div>
+            <div class="card-sub">Skin surface · Normal</div>
+            <div class="spark-wrap"><canvas class="chart-canvas" id="spark-temp" style="height:40px"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Movement</span>
+              <span style="font-size:1.2rem">↯</span>
+            </div>
+            <div class="card-value" id="m-movement" style="color:var(--teal2)">Low</div>
+            <div class="card-sub">Rest mode · Compliant</div>
+            <div class="spark-wrap"><canvas class="chart-canvas" id="spark-movement" style="height:40px"></canvas></div>
+          </div>
+        </div>
+
+        <!-- row 2: healing + alerts + fit -->
+        <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:1rem;">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Healing Progress</span>
+              <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--teal2)">Day 12 of ~42</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+              <div style="flex:1">
+                <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.3rem;">Overall recovery</div>
+                <div class="prog-bar"><div class="prog-fill" style="width:28%"></div></div>
+                <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--teal2);margin-top:0.3rem;">28% complete</div>
+              </div>
+              <div class="big-stat" style="padding:0;">
+                <div class="num" style="font-size:2rem;">28%</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+              <div style="background:var(--bg3);border-radius:8px;padding:0.6rem;">
+                <div style="font-size:0.62rem;color:var(--muted);margin-bottom:0.2rem;font-family:var(--font-mono);">SWELLING</div>
+                <div style="font-size:0.9rem;font-weight:600;color:var(--good);">↓ Reducing</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:8px;padding:0.6rem;">
+                <div style="font-size:0.62rem;color:var(--muted);margin-bottom:0.2rem;font-family:var(--font-mono);">EST. REMOVAL</div>
+                <div style="font-size:0.9rem;font-weight:600;color:var(--white);">May 13</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Active Alerts</span>
+              <span class="notif-count">2</span>
+            </div>
+            <div class="alert-item warn">
+              <div class="alert-icon">⚠</div>
+              <div>
+                <div class="alert-title">Pressure spike — Zone 3</div>
+                <div class="alert-desc">Brief elevation detected. Pneumatic system adjusted. Monitor.</div>
+                <div class="alert-time">14 min ago</div>
+              </div>
+            </div>
+            <div class="alert-item good">
+              <div class="alert-icon">✓</div>
+              <div>
+                <div class="alert-title">Fit optimized</div>
+                <div class="alert-desc">Pneumatic bladders auto-adjusted for swelling reduction.</div>
+                <div class="alert-time">2 hrs ago</div>
+              </div>
+            </div>
+            <div style="margin-top:0.75rem;text-align:center;">
+              <a href="#clinician/0" style="color:var(--teal2);font-size:0.7rem;text-decoration:none;">View all alerts in Clinician Dashboard →</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Pneumatic Fit</span>
+              <span style="font-size:0.65rem;font-family:var(--font-mono);color:var(--good);">AUTO</span>
+            </div>
+            <div class="zone-grid">
+              <div class="zone ok"><div class="zone-name">Wrist</div><div class="zone-val">✓</div></div>
+              <div class="zone ok"><div class="zone-name">Mid</div><div class="zone-val">✓</div></div>
+              <div class="zone warn"><div class="zone-name">Elbow</div><div class="zone-val">~</div></div>
+              <div class="zone ok"><div class="zone-name">Top</div><div class="zone-val">✓</div></div>
+              <div class="zone ok"><div class="zone-name">Base</div><div class="zone-val">✓</div></div>
+              <div class="zone ok"><div class="zone-name">Outer</div><div class="zone-val">✓</div></div>
+            </div>
+            <div style="font-size:0.68rem;color:var(--muted);margin-top:0.75rem;">5 of 6 zones optimal. Zone 3 adjusting.</div>
+          </div>
+        </div>
+
+        <!-- row 3: 24hr chart + next appt -->
+        <div class="grid-2-1">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">24-Hour Sensor Overview</span>
+              <div style="display:flex;gap:0.75rem;font-size:0.62rem;font-family:var(--font-mono);">
+                <span style="color:var(--teal2)">— Pressure</span>
+                <span style="color:var(--good)">— Moisture</span>
+                <span style="color:var(--warn)">— Temp</span>
+              </div>
+            </div>
+            <canvas id="main-chart" style="width:100%;height:160px;display:block;"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Care Schedule</span></div>
+            <div style="display:flex;flex-direction:column;gap:0.6rem;">
+              <div style="background:var(--bg3);border-radius:10px;padding:0.75rem;border:1px solid var(--border);">
+                <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);margin-bottom:0.25rem;">NEXT APPOINTMENT</div>
+                <div style="font-size:0.88rem;font-weight:600;color:var(--white);">April 15, 2026</div>
+                <div style="font-size:0.7rem;color:var(--muted);">Dr. Patel · Orthopedics</div>
+              </div>
+              <div style="background:rgba(16,185,129,0.06);border-radius:10px;padding:0.75rem;border:1px solid rgba(16,185,129,0.15);">
+                <div style="font-size:0.62rem;color:var(--good);font-family:var(--font-mono);margin-bottom:0.25rem;">CLINICIAN NOTE</div>
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.75);line-height:1.5;">"Healing on track. Swelling trend very positive. Keep activity minimal this week."</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:10px;padding:0.75rem;border:1px solid var(--border);">
+                <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);margin-bottom:0.25rem;">BATTERY</div>
+                <div class="prog-bar" style="margin:0;"><div class="prog-fill" style="width:73%;background:linear-gradient(90deg,var(--good),#34d399);"></div></div>
+                <div style="font-size:0.65rem;color:var(--muted);margin-top:0.3rem;">73% · ~3.1 days remaining</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ SENSORS ════════ -->
+      <div class="view" id="page-sensors">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Moisture Sensor</span><span class="live-badge" style="font-size:0.55rem;padding:0.15rem 0.4rem;"><div class="live-dot"></div>Live</span></div>
+            <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;color:var(--teal2);" id="s-moisture">18%</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem;">Skin surface relative humidity</div>
+            <div class="sensor-bar">
+              <span class="sensor-name">Current</span>
+              <div class="sensor-track"><div class="sensor-fill good" id="bar-moisture" style="width:18%;"></div></div>
+              <span class="sensor-val good" id="sv-moisture">18%</span>
+            </div>
+            <div class="sensor-bar">
+              <span class="sensor-name">24hr avg</span>
+              <div class="sensor-track"><div class="sensor-fill good" style="width:21%;"></div></div>
+              <span class="sensor-val" style="color:var(--muted)">21%</span>
+            </div>
+            <div class="sensor-bar">
+              <span class="sensor-name">Threshold</span>
+              <div class="sensor-track"><div class="sensor-fill warn" style="width:60%;"></div></div>
+              <span class="sensor-val" style="color:var(--warn)">60%</span>
+            </div>
+            <canvas id="chart-moisture" style="width:100%;height:100px;display:block;margin-top:1rem;"></canvas>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Pressure Sensor</span><span class="live-badge" style="font-size:0.55rem;padding:0.15rem 0.4rem;"><div class="live-dot"></div>Live</span></div>
+            <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;color:var(--good);" id="s-pressure">42 mmHg</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem;">Cast internal pressure distribution</div>
+            <div class="sensor-bar">
+              <span class="sensor-name">Zone 1</span>
+              <div class="sensor-track"><div class="sensor-fill good" style="width:38%;"></div></div>
+              <span class="sensor-val good">38</span>
+            </div>
+            <div class="sensor-bar">
+              <span class="sensor-name">Zone 2</span>
+              <div class="sensor-track"><div class="sensor-fill good" style="width:42%;"></div></div>
+              <span class="sensor-val good">42</span>
+            </div>
+            <div class="sensor-bar">
+              <span class="sensor-name">Zone 3</span>
+              <div class="sensor-track"><div class="sensor-fill warn" id="bar-z3" style="width:58%;"></div></div>
+              <span class="sensor-val warn" id="sv-z3">58</span>
+            </div>
+            <div class="sensor-bar">
+              <span class="sensor-name">Zone 4</span>
+              <div class="sensor-track"><div class="sensor-fill good" style="width:40%;"></div></div>
+              <span class="sensor-val good">40</span>
+            </div>
+            <canvas id="chart-pressure" style="width:100%;height:100px;display:block;margin-top:1rem;"></canvas>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Temperature Sensor</span><span class="live-badge" style="font-size:0.55rem;padding:0.15rem 0.4rem;"><div class="live-dot"></div>Live</span></div>
+            <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;color:var(--teal2);" id="s-temp">34.2°C</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem;">Skin surface temperature (inflammation proxy)</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:0.75rem;">
+              <div style="background:var(--bg3);border-radius:8px;padding:0.6rem;text-align:center;">
+                <div style="font-size:0.6rem;color:var(--muted);font-family:var(--font-mono);">MIN 24H</div>
+                <div style="font-size:0.9rem;font-weight:600;color:var(--white);">33.4°</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:8px;padding:0.6rem;text-align:center;">
+                <div style="font-size:0.6rem;color:var(--muted);font-family:var(--font-mono);">CURRENT</div>
+                <div style="font-size:0.9rem;font-weight:600;color:var(--teal2)" id="st-curr">34.2°</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:8px;padding:0.6rem;text-align:center;">
+                <div style="font-size:0.6rem;color:var(--muted);font-family:var(--font-mono);">MAX 24H</div>
+                <div style="font-size:0.9rem;font-weight:600;color:var(--white);">35.1°</div>
+              </div>
+            </div>
+            <canvas id="chart-temp" style="width:100%;height:100px;display:block;margin-top:1rem;"></canvas>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Movement Sensor</span><span class="live-badge" style="font-size:0.55rem;padding:0.15rem 0.4rem;"><div class="live-dot"></div>Live</span></div>
+            <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;color:var(--good);">Low</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem;">Activity compliance monitoring</div>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.75rem;">
+              <div class="sensor-bar">
+                <span class="sensor-name">Today</span>
+                <div class="sensor-track"><div class="sensor-fill good" style="width:15%;"></div></div>
+                <span class="sensor-val good">Low</span>
+              </div>
+              <div class="sensor-bar">
+                <span class="sensor-name">Yesterday</span>
+                <div class="sensor-track"><div class="sensor-fill good" style="width:22%;"></div></div>
+                <span class="sensor-val good">Low</span>
+              </div>
+              <div class="sensor-bar">
+                <span class="sensor-name">2 days ago</span>
+                <div class="sensor-track"><div class="sensor-fill warn" style="width:55%;"></div></div>
+                <span class="sensor-val warn">Mod.</span>
+              </div>
+            </div>
+            <div style="background:rgba(16,185,129,0.06);border-radius:8px;padding:0.65rem;border:1px solid rgba(16,185,129,0.15);">
+              <div style="font-size:0.7rem;color:var(--good);">✓ Compliance: 91% this week</div>
+              <div style="font-size:0.65rem;color:var(--muted);margin-top:0.2rem;">Activity within prescribed limits</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ HEALING ════════ -->
+      <div class="view" id="page-healing">
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:1rem;">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Healing Timeline</span></div>
+            <div style="margin-bottom:1rem;">
+              <div class="prog-bar" style="height:8px;"><div class="prog-fill" style="width:28%;"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:var(--muted);font-family:var(--font-mono);margin-top:0.3rem;">
+                <span>Day 0</span><span>Day 12 ← now</span><span>~Day 42</span>
+              </div>
+            </div>
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-dot done">✓</div>
+                <div class="tl-body">
+                  <div class="tl-label">Injury &amp; Application</div>
+                  <div class="tl-date">Mar 20, 2026</div>
+                  <div class="tl-note">Smart Cast applied. Baseline sensor readings established. Initial swelling: moderate. Pneumatic system initialized.</div>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot done">✓</div>
+                <div class="tl-body">
+                  <div class="tl-label">Peak Swelling Phase</div>
+                  <div class="tl-date">Mar 21–23, 2026</div>
+                  <div class="tl-note">Pneumatic bladders auto-adjusted ×3. Pressure held within therapeutic range. No sores detected.</div>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot done">✓</div>
+                <div class="tl-body">
+                  <div class="tl-label">Swelling Reduction Begins</div>
+                  <div class="tl-date">Mar 24–31, 2026</div>
+                  <div class="tl-note">Gradual pneumatic retightening. Moisture consistently below 30%. Skin health: excellent.</div>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot active">●</div>
+                <div class="tl-body">
+                  <div class="tl-label">Active Healing — Week 2</div>
+                  <div class="tl-date">Apr 1–7, 2026 · In Progress</div>
+                  <div class="tl-note">Callus formation expected. Sensor data nominal. Next remote check-in April 5.</div>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot pending">○</div>
+                <div class="tl-body">
+                  <div class="tl-label">Mid-Healing Checkpoint</div>
+                  <div class="tl-date">~Apr 15, 2026</div>
+                  <div class="tl-note">X-ray to confirm callus development. Cast may be adjusted or replaced depending on healing rate.</div>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot pending">○</div>
+                <div class="tl-body">
+                  <div class="tl-label">Cast Removal</div>
+                  <div class="tl-date">~May 1–13, 2026</div>
+                  <div class="tl-note">Target removal window. Final sensor report generated for clinical record.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Recovery Metrics</span></div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
+                <div style="text-align:center;padding:0.75rem;background:var(--bg3);border-radius:10px;">
+                  <div style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--teal2);">12</div>
+                  <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);">DAYS WORN</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem;background:var(--bg3);border-radius:10px;">
+                  <div style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--good);">0</div>
+                  <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);">COMPLICATIONS</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem;background:var(--bg3);border-radius:10px;">
+                  <div style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--teal2);">7</div>
+                  <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);">AUTO ADJUSTS</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem;background:var(--bg3);border-radius:10px;">
+                  <div style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--good);">91%</div>
+                  <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);">COMPLIANCE</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem;background:var(--bg3);border-radius:10px;">
+                  <div style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--teal2);">1</div>
+                  <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);">APPT SKIPPED</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem;background:var(--bg3);border-radius:10px;">
+                  <div style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--good);">A+</div>
+                  <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);">SKIN HEALTH</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Swelling Trend (12 days)</span></div>
+              <canvas id="chart-swelling" style="width:100%;height:140px;display:block;"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Care Tips — Week 2</span></div>
+              <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                <div style="display:flex;gap:0.6rem;align-items:flex-start;">
+                  <span style="color:var(--teal2);font-size:0.9rem;flex-shrink:0;">💧</span>
+                  <div style="font-size:0.75rem;color:rgba(255,255,255,0.75);line-height:1.5;">You can shower and bathe normally — your Smart Cast is fully waterproof to IP68.</div>
+                </div>
+                <div style="display:flex;gap:0.6rem;align-items:flex-start;">
+                  <span style="font-size:0.9rem;flex-shrink:0;">⚡</span>
+                  <div style="font-size:0.75rem;color:rgba(255,255,255,0.75);line-height:1.5;">Charge your cast every 3–4 days using the USB-C port on the outer shell edge.</div>
+                </div>
+                <div style="display:flex;gap:0.6rem;align-items:flex-start;">
+                  <span style="color:var(--warn);font-size:0.9rem;flex-shrink:0;">⚠</span>
+                  <div style="font-size:0.75rem;color:rgba(255,255,255,0.75);line-height:1.5;">Avoid heavy lifting or impact activity. Movement sensors are monitoring compliance.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ ALERTS ════════ -->
+      <div class="view" id="page-alerts">
+        <div class="grid-2-1">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">All Alerts</span>
+              <div class="tabs" style="margin:0;padding:0;border:none;">
+                <button class="tab-btn active" onclick="filterAlerts('all',this)">All</button>
+                <button class="tab-btn" onclick="filterAlerts('warn',this)">Warnings</button>
+                <button class="tab-btn" onclick="filterAlerts('good',this)">Resolved</button>
+              </div>
+            </div>
+            <div id="alert-list">
+              <div class="alert-item warn" data-type="warn">
+                <div class="alert-icon">⚠</div>
+                <div>
+                  <div class="alert-title">Pressure Elevation — Zone 3</div>
+                  <div class="alert-desc">Zone 3 pressure reached 58 mmHg, above the 50 mmHg comfortable threshold. Pneumatic bladder in Zone 3 vented pressure. Declining toward baseline. Pressure now declining toward baseline.</div>
+                  <div class="alert-time">Today · 13:47</div>
+                </div>
+              </div>
+              <div class="alert-item good" data-type="good">
+                <div class="alert-icon">✓</div>
+                <div>
+                  <div class="alert-title">Pneumatic Auto-Adjustment Complete</div>
+                  <div class="alert-desc">Pneumatic bladders across all 6 zones recalibrated following overnight swelling reduction. New pressure baseline set. No manual intervention required.</div>
+                  <div class="alert-time">Today · 11:20</div>
+                </div>
+              </div>
+              <div class="alert-item good" data-type="good">
+                <div class="alert-icon">✓</div>
+                <div>
+                  <div class="alert-title">Daily Sensor Check Passed</div>
+                  <div class="alert-desc">All four sensor channels (moisture, pressure, temperature, movement) within nominal parameters. Clinician dashboard updated with overnight data package.</div>
+                  <div class="alert-time">Today · 07:00</div>
+                </div>
+              </div>
+              <div class="alert-item warn" data-type="warn">
+                <div class="alert-icon">⚑</div>
+                <div>
+                  <div class="alert-title">Elevated Movement Detected</div>
+                  <div class="alert-desc">Activity above prescribed limit detected for 12 minutes at 15:30 yesterday. Your clinician has been notified. Please avoid heavy lifting and impact activities this week.</div>
+                  <div class="alert-time">Yesterday · 15:42</div>
+                </div>
+              </div>
+              <div class="alert-item good" data-type="good">
+                <div class="alert-icon">✓</div>
+                <div>
+                  <div class="alert-title">7-Day Skin Health Report: Excellent</div>
+                  <div class="alert-desc">Moisture remained below 30% for the full 7-day period. No signs of maceration, pressure sores, or temperature elevation indicating inflammation. Excellent progress.</div>
+                  <div class="alert-time">Mar 30 · 08:00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Alert Summary</span></div>
+              <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem;background:rgba(245,158,11,0.07);border-radius:8px;border:1px solid rgba(245,158,11,0.15);">
+                  <span style="font-size:0.78rem;color:var(--warn);">⚠ Warnings</span>
+                  <span style="font-family:var(--font-mono);font-size:0.8rem;color:var(--warn);">2</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem;background:rgba(16,185,129,0.06);border-radius:8px;border:1px solid rgba(16,185,129,0.15);">
+                  <span style="font-size:0.78rem;color:var(--good);">✓ Resolved</span>
+                  <span style="font-family:var(--font-mono);font-size:0.8rem;color:var(--good);">8</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem;background:rgba(239,68,68,0.06);border-radius:8px;border:1px solid rgba(239,68,68,0.1);">
+                  <span style="font-size:0.78rem;color:#f87171;">✕ Critical</span>
+                  <span style="font-family:var(--font-mono);font-size:0.8rem;color:#f87171;">0</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Notification Settings</span></div>
+              <div class="setting-row">
+                <div><div class="setting-label">Push Notifications</div><div class="setting-sub">Receive alerts on your phone</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div><div class="setting-label">Clinician Auto-Notify</div><div class="setting-sub">Alert Dr. Patel on warnings</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div><div class="setting-label">Daily Summary</div><div class="setting-sub">Morning report at 7:00 AM</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ CLINICIAN ════════ -->
+      <div class="view" id="page-clinician">
+        <div style="display:grid;grid-template-columns:240px 1fr;gap:1rem;height:100%;min-height:0;">
+
+          <!-- Patient list -->
+          <div class="card" style="overflow-y:auto;align-self:start;max-height:calc(100vh - 120px);">
+            <div class="card-header"><span class="card-title">My Patients</span><span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--muted);">4 active</span></div>
+            <div id="patient-list"></div>
+          </div>
+
+          <!-- Patient detail -->
+          <div style="display:flex;flex-direction:column;gap:1rem;overflow-y:auto;max-height:calc(100vh - 120px);" id="patient-detail">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ SETTINGS ════════ -->
+      <div class="view" id="page-settings">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Patient Profile</span></div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+              <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1a4060,#0d9488);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;border:2px solid var(--teal2);">JM</div>
+              <div>
+                <div style="font-family:var(--font-display);font-size:1rem;font-weight:700;">Jordan Mitchell</div>
+                <div style="font-size:0.72rem;color:var(--muted);">Patient ID: SC-2026-0312</div>
+                <div style="font-size:0.72rem;color:var(--teal2);margin-top:0.2rem;">Distal Radius Fracture · Right arm</div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Treating Clinician</div><div class="setting-sub">Dr. R. Patel — Orthopedics</div></div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Cast Applied</div><div class="setting-sub">March 20, 2026</div></div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Expected Removal</div><div class="setting-sub">~May 1–13, 2026</div></div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Cast Serial</div><div class="setting-sub" style="font-family:var(--font-mono);font-size:0.62rem;">SC-NL-20260320-0047</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">App Settings</span></div>
+            <div class="setting-row">
+              <div><div class="setting-label">Push Notifications</div><div class="setting-sub">Receive alerts and updates</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Light Mode</div><div class="setting-sub">Switch to light theme</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="settings-theme-toggle" onchange="toggleTheme()"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Share Data with Clinician</div><div class="setting-sub">Real-time sensor data access</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Weekly Report Email</div><div class="setting-sub">Summary sent every Monday</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Pneumatic Auto-Adjust Mode</div><div class="setting-sub">Cast adjusts fit automatically</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Alert Thresholds</span></div>
+            <div class="sensor-bar" style="padding:0.75rem 0;">
+              <span class="sensor-name" style="font-size:0.72rem;color:var(--white);">Moisture</span>
+              <div style="flex:1;"><input type="range" min="30" max="80" value="60" style="width:100%;accent-color:var(--teal2);"></div>
+              <span class="sensor-val" style="color:var(--teal2)">60%</span>
+            </div>
+            <div class="sensor-bar" style="padding:0.75rem 0;">
+              <span class="sensor-name" style="font-size:0.72rem;color:var(--white);">Pressure</span>
+              <div style="flex:1;"><input type="range" min="40" max="100" value="50" style="width:100%;accent-color:var(--teal2);"></div>
+              <span class="sensor-val" style="color:var(--teal2)">50 mmHg</span>
+            </div>
+            <div class="sensor-bar" style="padding:0.75rem 0;">
+              <span class="sensor-name" style="font-size:0.72rem;color:var(--white);">Temperature</span>
+              <div style="flex:1;"><input type="range" min="35" max="40" value="37" style="width:100%;accent-color:var(--teal2);"></div>
+              <span class="sensor-val" style="color:var(--teal2)">37°C</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Device Status</span></div>
+            <div style="display:flex;flex-direction:column;gap:0.6rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.78rem;color:var(--white);">Battery</span>
+                <div style="flex:1;margin:0 0.75rem;"><div class="prog-bar"><div class="prog-fill" style="width:73%;background:linear-gradient(90deg,var(--good),#34d399);"></div></div></div>
+                <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--good);">73%</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:0.75rem;color:var(--muted);">Firmware</span>
+                <span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--teal2);">v2.4.1 · Up to date</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:0.75rem;color:var(--muted);">Bluetooth</span>
+                <span style="font-size:0.68rem;color:var(--good);">● Connected</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:0.75rem;color:var(--muted);">Last sync</span>
+                <span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--muted);">2 min ago</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:0.75rem;color:var(--muted);">Waterproof seal</span>
+                <span style="font-size:0.68rem;color:var(--good);">● IP68 Intact</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+<!-- ── EDIT PATIENT MODAL ── -->
+<div id="edit-modal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>Edit Patient Profile</span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name</label>
+        <input id="ef-first" type="text" placeholder="Jordan"/>
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input id="ef-last" type="text" placeholder="Mitchell"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age</label>
+        <input id="ef-age" type="number" min="1" max="120" placeholder="34"/>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="ef-status">
+          <option value="good">Good</option>
+          <option value="warn">Monitor</option>
+          <option value="danger">Review</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Injury / Diagnosis</label>
+        <input id="ef-injury" type="text" placeholder="Distal radius fracture"/>
+      </div>
+      <div class="form-group">
+        <label>Affected Side</label>
+        <select id="ef-side">
+          <option value="Right arm">Right arm</option>
+          <option value="Left arm">Left arm</option>
+          <option value="Right wrist">Right wrist</option>
+          <option value="Left wrist">Left wrist</option>
+          <option value="Right leg">Right leg</option>
+          <option value="Left leg">Left leg</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Cast Day (current)</label>
+        <input id="ef-day" type="number" min="0" placeholder="12"/>
+      </div>
+      <div class="form-group">
+        <label>Total Cast Days (est.)</label>
+        <input id="ef-total" type="number" min="1" placeholder="42"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Next Appointment</label>
+        <input id="ef-appt" type="text" placeholder="Apr 15, 2026"/>
+      </div>
+      <div class="form-group">
+        <label>Status Label</label>
+        <input id="ef-statuslabel" type="text" placeholder="Monitor"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEditModal()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /root -->
+
+<script>
+// ── PAGE NAVIGATION ──
+const pages = ['dashboard','sensors','healing','alerts','clinician','settings'];
+function switchPage(id){
+  pages.forEach(p=>{
+    document.getElementById('page-'+p).classList.toggle('active',p===id);
+  });
+  document.querySelectorAll('.sb-btn').forEach((b,i)=>{
+    b.classList.toggle('active',pages[i]===id);
+  });
+  const titles={dashboard:'Dashboard',sensors:'Live Sensors',healing:'Healing Timeline',alerts:'Alerts & Notifications',clinician:'Clinician Dashboard',settings:'Settings'};
+  document.getElementById('page-title').textContent=titles[id];
+  // Update view toggle
+  if (id === 'clinician') {
+    document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.vt-btn[onclick*="clinician-top"]').classList.add('active');
+  } else if (id === 'dashboard') {
+    document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.vt-btn[onclick*="patient"]').classList.add('active');
+  }
+}
+
+// ── VIEW TOGGLE ──
+function switchView(v,btn){
+  document.querySelectorAll('.vt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(v==='clinician-top') switchPage('clinician');
+  else switchPage('dashboard');
+}
+
+// ── ALERT FILTER ──
+function filterAlerts(type,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.alert-item').forEach(el=>{
+    el.style.display=(type==='all'||el.dataset.type===type)?'flex':'none';
+  });
+}
+
+// ── PATIENT DATA ──
+const PATIENTS = [
+  {
+    id: 0,
+    initials: 'JM',
+    name: 'Jordan Mitchell',
+    age: 34,
+    injury: 'Distal radius fracture',
+    side: 'Right arm',
+    day: 12,
+    totalDays: 42,
+    nextAppt: 'Apr 15, 2026',
+    avatarGrad: 'linear-gradient(135deg,#1a4060,#0d9488)',
+    statusLabel: 'Monitor',
+    statusClass: 'warn',
+    sensors: { moisture:{val:'18%',color:'var(--good)',label:'Normal'}, pressure:{val:'58 mmHg',color:'var(--warn)',label:'Zone 3 ↑'}, temp:{val:'34.2°C',color:'var(--teal2)',label:'Normal'}, compliance:{val:'91%',color:'var(--good)',label:'Good'} },
+    zones: [{n:'Wrist',s:'ok'},{n:'Mid',s:'ok'},{n:'Elbow',s:'warn'},{n:'Top',s:'ok'},{n:'Base',s:'ok'},{n:'Outer',s:'ok'}],
+    alerts: [
+      {type:'warn',icon:'⚠',title:'Pressure spike — Zone 3',desc:'Brief elevation at 58 mmHg. Pneumatic bladder vented Zone 3 pressure. Declining.',time:'14 min ago'},
+      {type:'good',icon:'✓',title:'Fit auto-optimized',desc:'All pneumatic zones recalibrated after overnight swelling reduction.',time:'2 hrs ago'},
+    ],
+    notes: [
+      {date:'Apr 1',text:'Healing on track. Swelling trend very positive. Keep activity minimal this week.'},
+      {date:'Mar 25',text:'Peak swelling passed. Smart Cast auto-adjusted well. No complications. Schedule 2-week remote check.'},
+    ],
+    pressureData: [42,44,46,50,48,45,44,58,55,50,46,44,42,43,44,42],
+    moistureData: [18,19,20,18,17,19,21,20,18,17,16,18,19,17,18,18],
+  },
+  {
+    id: 1,
+    initials: 'SK',
+    name: 'Sarah Kim',
+    age: 28,
+    injury: 'Ulna fracture',
+    side: 'Left arm',
+    day: 28,
+    totalDays: 40,
+    nextAppt: 'Apr 10, 2026',
+    avatarGrad: 'linear-gradient(135deg,#2d1a60,#7c3aed)',
+    statusLabel: 'Good',
+    statusClass: 'good',
+    sensors: { moisture:{val:'14%',color:'var(--good)',label:'Excellent'}, pressure:{val:'38 mmHg',color:'var(--good)',label:'Optimal'}, temp:{val:'33.8°C',color:'var(--good)',label:'Normal'}, compliance:{val:'98%',color:'var(--good)',label:'Excellent'} },
+    zones: [{n:'Wrist',s:'ok'},{n:'Mid',s:'ok'},{n:'Elbow',s:'ok'},{n:'Top',s:'ok'},{n:'Base',s:'ok'},{n:'Outer',s:'ok'}],
+    alerts: [
+      {type:'good',icon:'✓',title:'7-Day skin check: Excellent',desc:'Moisture below 20% entire week. No maceration, pressure sores, or temp elevation.',time:'Today 07:00'},
+      {type:'good',icon:'✓',title:'Daily sensor check passed',desc:'All four channels nominal. Clinician dashboard updated.',time:'Today 07:00'},
+    ],
+    notes: [
+      {date:'Mar 28',text:'Day 28 — excellent recovery trajectory. Bone density appears strong on last X-ray. Targeting cast removal by Apr 12.'},
+      {date:'Mar 14',text:'Peak swelling resolved faster than expected. Patient very compliant with activity restrictions.'},
+    ],
+    pressureData: [38,37,39,38,36,37,38,37,39,38,37,38,36,37,38,38],
+    moistureData: [14,15,13,14,16,14,13,14,15,13,14,14,15,14,13,14],
+  },
+  {
+    id: 2,
+    initials: 'MT',
+    name: 'Marcus Torres',
+    age: 19,
+    injury: 'Distal wrist fracture',
+    side: 'Right arm',
+    day: 5,
+    totalDays: 38,
+    nextAppt: 'Apr 5, 2026',
+    avatarGrad: 'linear-gradient(135deg,#601a1a,#dc2626)',
+    statusLabel: 'Review',
+    statusClass: 'danger',
+    sensors: { moisture:{val:'41%',color:'var(--warn)',label:'Elevated ↑'}, pressure:{val:'67 mmHg',color:'var(--danger)',label:'High!'}, temp:{val:'36.1°C',color:'var(--warn)',label:'Slightly ↑'}, compliance:{val:'62%',color:'var(--danger)',label:'Low'} },
+    zones: [{n:'Wrist',s:'warn'},{n:'Mid',s:'warn'},{n:'Elbow',s:'ok'},{n:'Top',s:'ok'},{n:'Base',s:'warn'},{n:'Outer',s:'ok'}],
+    alerts: [
+      {type:'danger',icon:'✕',title:'High pressure — Zone 1 & 2',desc:'Sustained pressure above 65 mmHg for 18 min. Pneumatic bladders at maximum inflation. Manual review required.',time:'32 min ago'},
+      {type:'warn',icon:'⚠',title:'Elevated moisture detected',desc:'Skin moisture at 41% — approaching maceration threshold of 60%. Monitor closely.',time:'1 hr ago'},
+      {type:'warn',icon:'⚑',title:'Non-compliance alert',desc:'High-impact activity detected for 22 minutes. Activity sensors flagged. Patient notified.',time:'Yesterday 16:10'},
+    ],
+    notes: [
+      {date:'Apr 1',text:'Day 5 — peak swelling phase. Pressure elevated in zones 1 and 2. Pneumatic system struggling to compensate. Consider in-person review if pressure does not resolve by tomorrow.'},
+      {date:'Mar 28',text:'Initial cast applied. Patient is 19 y/o athlete — reminded strongly about activity restrictions.'},
+    ],
+    pressureData: [52,55,58,62,65,67,66,68,67,65,67,68,66,67,69,67],
+    moistureData: [28,30,33,35,37,38,39,40,39,41,40,42,41,40,41,41],
+  },
+  {
+    id: 3,
+    initials: 'AR',
+    name: 'Anika Rao',
+    age: 52,
+    injury: 'Scaphoid fracture',
+    side: 'Left wrist',
+    day: 35,
+    totalDays: 56,
+    nextAppt: 'Apr 20, 2026',
+    avatarGrad: 'linear-gradient(135deg,#1a5060,#0891b2)',
+    statusLabel: 'Good',
+    statusClass: 'good',
+    sensors: { moisture:{val:'16%',color:'var(--good)',label:'Normal'}, pressure:{val:'40 mmHg',color:'var(--good)',label:'Optimal'}, temp:{val:'34.0°C',color:'var(--good)',label:'Normal'}, compliance:{val:'95%',color:'var(--good)',label:'Excellent'} },
+    zones: [{n:'Wrist',s:'ok'},{n:'Mid',s:'ok'},{n:'Elbow',s:'ok'},{n:'Top',s:'ok'},{n:'Base',s:'ok'},{n:'Outer',s:'ok'}],
+    alerts: [
+      {type:'good',icon:'✓',title:'Week 5 check: All clear',desc:'Pressure, moisture, and temperature all within optimal ranges throughout week 5.',time:'Today 08:00'},
+      {type:'good',icon:'✓',title:'Pneumatic system recalibrated',desc:'Minor overnight adjustment — minor pressure increase as swelling resolved.',time:'Yesterday 03:12'},
+    ],
+    notes: [
+      {date:'Mar 30',text:'Week 5 — scaphoid fractures heal slowly but sensors indicate excellent progress. No avascular necrosis signs. On track for week 8 removal.'},
+      {date:'Mar 16',text:'Scaphoid confirmed on MRI. Cast applied. Long healing window expected (6-8 weeks). Remote monitoring especially valuable for this patient given distance from clinic.'},
+    ],
+    pressureData: [40,41,40,39,40,41,40,39,40,41,40,40,39,40,41,40],
+    moistureData: [16,17,16,15,16,17,16,15,16,17,16,16,15,16,17,16],
+  },
+];
+
+let selectedPatientId = 0;
+// per-patient saved notes (runtime only)
+const patientNotes = { 0:[], 1:[], 2:[], 3:[] };
+
+function buildPatientList() {
+  const list = document.getElementById('patient-list');
+  list.innerHTML = '';
+  PATIENTS.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'patient-row' + (p.id === selectedPatientId ? ' selected' : '');
+    row.innerHTML = `
+      <div class="pat-avatar" style="background:${p.avatarGrad};">${p.initials}</div>
+      <div>
+        <div class="pat-name">${p.name}</div>
+        <div class="pat-sub">${p.injury} · Day ${p.day}</div>
+      </div>
+      <div class="pat-status ${p.statusClass}">${p.statusLabel}</div>`;
+    row.addEventListener('click', () => selectPatient(p.id));
+    list.appendChild(row);
+  });
+}
+
+function selectPatient(id) {
+  selectedPatientId = id;
+  buildPatientList();
+  renderPatientDetail(id);
+}
+
+function renderPatientDetail(id) {
+  const p = PATIENTS[id];
+  const pct = Math.round(p.day / p.totalDays * 100);
+  const detail = document.getElementById('patient-detail');
+
+  // Zones HTML
+  const zonesHTML = p.zones.map(z => `
+    <div class="zone ${z.s}">
+      <div class="zone-name">${z.n}</div>
+      <div class="zone-val">${z.s==='ok'?'✓':'~'}</div>
+    </div>`).join('');
+
+  // Alerts HTML
+  const alertsHTML = p.alerts.map(a => `
+    <div class="alert-item ${a.type}">
+      <div class="alert-icon">${a.icon}</div>
+      <div>
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+        <div class="alert-time">${a.time}</div>
+      </div>
+    </div>`).join('');
+
+  // Notes HTML — combine static + runtime saved
+  const allNotes = [...patientNotes[id], ...p.notes];
+  const notesHTML = allNotes.map(n => `
+    <div style="background:var(--bg3);border-radius:8px;padding:0.65rem;">
+      <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);">DR. PATEL · ${n.date}</div>
+      <div style="font-size:0.75rem;color:rgba(255,255,255,0.8);margin-top:0.2rem;line-height:1.5;">"${n.text}"</div>
+    </div>`).join('');
+
+  detail.innerHTML = `
+    <!-- Header card -->
+    <div class="card">
+      <div class="card-header">
+        <div style="display:flex;align-items:center;gap:0.85rem;">
+          <div style="width:46px;height:46px;border-radius:50%;background:${p.avatarGrad};display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;border:2px solid var(--border);">${p.initials}</div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;">${p.name}</div>
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:0.1rem;">${p.age} y/o · ${p.injury} · ${p.side} · Day ${p.day} of ~${p.totalDays}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <div class="pat-status ${p.statusClass}" style="font-size:0.72rem;padding:0.3rem 0.75rem;">${p.statusLabel}</div>
+          <button style="background:rgba(45,212,191,0.1);border:1px solid var(--border);color:var(--teal2);padding:0.4rem 0.8rem;border-radius:8px;font-size:0.72rem;cursor:pointer;" onclick="openEditModal(${id})">✎ Edit</button>
+          <button style="background:rgba(45,212,191,0.1);border:1px solid var(--border);color:var(--teal2);padding:0.4rem 0.8rem;border-radius:8px;font-size:0.72rem;cursor:pointer;">Message</button>
+          <button style="background:var(--teal);border:none;color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.72rem;cursor:pointer;" onclick="showNoteInput()">+ Note</button>
+        </div>
+      </div>
+      <!-- Progress -->
+      <div style="margin-bottom:0.75rem;">
+        <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);margin-bottom:0.3rem;">
+          <span>RECOVERY PROGRESS</span><span>${pct}% · Next appt ${p.nextAppt}</span>
+        </div>
+        <div class="prog-bar" style="height:7px;"><div class="prog-fill" style="width:${pct}%;"></div></div>
+      </div>
+      <!-- Sensor grid -->
+      <div class="grid-4" style="gap:0.75rem;">
+        ${['moisture','pressure','temp','compliance'].map(k => `
+        <div style="background:var(--bg3);border-radius:8px;padding:0.75rem;text-align:center;">
+          <div style="font-size:0.58rem;color:var(--muted);font-family:var(--font-mono);margin-bottom:0.2rem;">${k.toUpperCase()}</div>
+          <div style="font-size:1.1rem;font-weight:700;color:${p.sensors[k].color};">${p.sensors[k].val}</div>
+          <div style="font-size:0.58rem;color:${p.sensors[k].color};">${p.sensors[k].label}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Chart + zones row -->
+    <div class="grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">48-Hour Sensor Trend</span>
+          <div style="display:flex;gap:0.6rem;font-size:0.6rem;font-family:var(--font-mono);">
+            <span style="color:var(--teal2)">— Pressure</span>
+            <span style="color:var(--good)">— Moisture</span>
+          </div>
+        </div>
+        <canvas id="chart-clin-${id}" style="width:100%;height:110px;display:block;"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Pneumatic Fit Zones</span></div>
+        <div class="zone-grid">${zonesHTML}</div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:0.75rem;">
+          ${p.zones.filter(z=>z.s==='ok').length} of ${p.zones.length} zones optimal.
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts + Notes row -->
+    <div class="grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent Alerts</span></div>
+        ${alertsHTML}
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Clinician Notes</span></div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;" id="notes-list-${id}">${notesHTML}</div>
+        <div id="note-input-area" style="display:none;margin-top:0.75rem;">
+          <textarea id="note-text" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:0.6rem;font-size:0.75rem;font-family:var(--font);resize:none;height:70px;" placeholder="Add clinical note..."></textarea>
+          <div style="display:flex;gap:0.5rem;margin-top:0.4rem;">
+            <button onclick="saveNote()" style="background:var(--teal);border:none;color:#fff;padding:0.35rem 0.75rem;border-radius:6px;font-size:0.7rem;cursor:pointer;">Save</button>
+            <button onclick="cancelNote()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:0.35rem 0.75rem;border-radius:6px;font-size:0.7rem;cursor:pointer;">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Draw chart for this patient
+  setTimeout(() => {
+    makeLineChart(`chart-clin-${id}`, [
+      {data: p.pressureData, color: '#2dd4bf'},
+      {data: p.moistureData, color: '#10b981'},
+    ]);
+  }, 50);
+}
+
+// ── NOTES ──
+function showNoteInput() { document.getElementById('note-input-area').style.display='block'; }
+function cancelNote() { document.getElementById('note-input-area').style.display='none'; }
+function saveNote() {
+  const txt = document.getElementById('note-text').value.trim();
+  if (!txt) return;
+  const today = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  patientNotes[selectedPatientId].unshift({date: today, text: txt});
+  document.getElementById('note-text').value = '';
+  document.getElementById('note-input-area').style.display = 'none';
+  // Re-render notes list only
+  const list = document.getElementById(`notes-list-${selectedPatientId}`);
+  if (list) {
+    const allNotes = [...patientNotes[selectedPatientId], ...PATIENTS[selectedPatientId].notes];
+    list.innerHTML = allNotes.map(n => `
+      <div style="background:var(--bg3);border-radius:8px;padding:0.65rem;">
+        <div style="font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);">DR. PATEL · ${n.date}</div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.8);margin-top:0.2rem;line-height:1.5;">"${n.text}"</div>
+      </div>`).join('');
+  }
+}
+
+// Init clinician view
+buildPatientList();
+renderPatientDetail(0);
+
+// ── CANVAS CHARTS ──
+function makeSparkline(id, data, color){
+  const canvas=document.getElementById(id);
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth||200, H=canvas.offsetHeight||40;
+  canvas.width=W; canvas.height=H;
+  const min=Math.min(...data)-2, max=Math.max(...data)+2;
+  const px=(v,i)=>i/(data.length-1)*W;
+  const py=v=>H-(v-min)/(max-min)*H*0.85-H*0.075;
+  ctx.clearRect(0,0,W,H);
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,color+'40');
+  grad.addColorStop(1,color+'00');
+  ctx.beginPath(); ctx.moveTo(px(data[0],0),py(data[0]));
+  data.forEach((v,i)=>ctx.lineTo(px(v,i),py(v)));
+  ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(px(data[0],0),py(data[0]));
+  data.forEach((v,i)=>ctx.lineTo(px(v,i),py(v)));
+  ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.stroke();
+}
+
+function makeLineChart(id, datasets, labels){
+  const canvas=document.getElementById(id);
+  if(!canvas)return;
+  const W=canvas.offsetWidth||400, H=canvas.offsetHeight||140;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  // grid
+  ctx.strokeStyle='rgba(45,212,191,0.06)'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=H*0.1+i*(H*0.8/4);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  datasets.forEach(({data,color})=>{
+    const all=[].concat(...datasets.map(d=>d.data));
+    const min=Math.min(...all)*0.9, max=Math.max(...all)*1.1;
+    const px=(i)=>W*0.02+i/(data.length-1)*(W*0.96);
+    const py=(v)=>H*0.9-(v-min)/(max-min)*(H*0.8);
+    ctx.beginPath(); ctx.moveTo(px(0),py(data[0]));
+    data.forEach((v,i)=>ctx.lineTo(px(i),py(v)));
+    ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.lineJoin='round'; ctx.stroke();
+    // dot at end
+    ctx.beginPath(); ctx.arc(px(data.length-1),py(data[data.length-1]),3,0,Math.PI*2);
+    ctx.fillStyle=color; ctx.fill();
+  });
+}
+
+// Generate fake data
+function gen(base,variance,n){return Array.from({length:n},()=>+(base+(Math.random()-0.5)*variance*2).toFixed(1));}
+
+const moistureData=gen(18,4,24);
+const pressureData=gen(42,8,24);
+const tempData=gen(34.2,0.5,24);
+const movData=gen(10,5,24);
+const swellData=[85,82,80,76,72,68,65,62,60,58,55,52].map(v=>+(v+Math.random()*2).toFixed(1));
+
+setTimeout(()=>{
+  makeSparkline('spark-moisture',moistureData,'#2dd4bf');
+  makeSparkline('spark-pressure',pressureData,'#10b981');
+  makeSparkline('spark-temp',tempData,'#f59e0b');
+  makeSparkline('spark-movement',movData,'#2dd4bf');
+  makeLineChart('main-chart',[
+    {data:pressureData,color:'#2dd4bf'},
+    {data:moistureData,color:'#10b981'},
+    {data:tempData.map(v=>v*1.2),color:'#f59e0b'}
+  ]);
+  makeSparkline('chart-moisture',moistureData,'#2dd4bf');
+  makeSparkline('chart-pressure',pressureData,'#10b981');
+  makeSparkline('chart-temp',tempData,'#f59e0b');
+  makeLineChart('chart-swelling',[{data:swellData,color:'#2dd4bf'}]);
+  // chart-clin is rendered dynamically per patient
+},100);
+
+// ── LIGHT MODE ──
+let isLight = false;
+function toggleTheme() {
+  isLight = !isLight;
+  document.body.classList.toggle('light', isLight);
+  const btn = document.getElementById('theme-btn');
+  btn.textContent = isLight ? '🌙' : '☀';
+  btn.title = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+  // Keep settings toggle in sync
+  const settingsToggle = document.getElementById('settings-theme-toggle');
+  if (settingsToggle) settingsToggle.checked = isLight;
+  // Redraw charts after theme change so colors update properly
+  setTimeout(() => {
+    makeSparkline('spark-moisture', moistureData, '#2dd4bf');
+    makeSparkline('spark-pressure', pressureData, '#10b981');
+    makeSparkline('spark-temp', tempData, '#f59e0b');
+    makeSparkline('spark-movement', movData, '#2dd4bf');
+    makeLineChart('main-chart', [
+      {data:pressureData,color:'#2dd4bf'},
+      {data:moistureData,color:'#10b981'},
+      {data:tempData.map(v=>v*1.2),color:'#f59e0b'}
+    ]);
+    makeSparkline('chart-moisture', moistureData, '#2dd4bf');
+    makeSparkline('chart-pressure', pressureData, '#10b981');
+    makeSparkline('chart-temp', tempData, '#f59e0b');
+    makeLineChart('chart-swelling', [{data:swellData,color:'#2dd4bf'}]);
+    const clinCanvas = document.getElementById(`chart-clin-${selectedPatientId}`);
+    if (clinCanvas) makeLineChart(`chart-clin-${selectedPatientId}`, [
+      {data: PATIENTS[selectedPatientId].pressureData, color: '#2dd4bf'},
+      {data: PATIENTS[selectedPatientId].moistureData, color: '#10b981'},
+    ]);
+  }, 50);
+}
+
+// ── EDIT PATIENT MODAL ──
+function openEditModal(id) {
+  const p = PATIENTS[id];
+  const parts = p.name.split(' ');
+  document.getElementById('ef-first').value = parts[0] || '';
+  document.getElementById('ef-last').value = parts.slice(1).join(' ') || '';
+  document.getElementById('ef-age').value = p.age;
+  document.getElementById('ef-injury').value = p.injury;
+  document.getElementById('ef-side').value = p.side;
+  document.getElementById('ef-day').value = p.day;
+  document.getElementById('ef-total').value = p.totalDays;
+  document.getElementById('ef-appt').value = p.nextAppt;
+  document.getElementById('ef-status').value = p.statusClass;
+  document.getElementById('ef-statuslabel').value = p.statusLabel;
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+}
+function saveEditModal() {
+  const p = PATIENTS[selectedPatientId];
+  const first = document.getElementById('ef-first').value.trim();
+  const last = document.getElementById('ef-last').value.trim();
+  p.name = [first, last].filter(Boolean).join(' ') || p.name;
+  p.initials = ((first[0]||'') + (last[0]||'')).toUpperCase() || p.initials;
+  p.age = parseInt(document.getElementById('ef-age').value) || p.age;
+  p.injury = document.getElementById('ef-injury').value.trim() || p.injury;
+  p.side = document.getElementById('ef-side').value;
+  p.day = parseInt(document.getElementById('ef-day').value) || p.day;
+  p.totalDays = parseInt(document.getElementById('ef-total').value) || p.totalDays;
+  p.nextAppt = document.getElementById('ef-appt').value.trim() || p.nextAppt;
+  p.statusClass = document.getElementById('ef-status').value;
+  p.statusLabel = document.getElementById('ef-statuslabel').value.trim() || p.statusLabel;
+  closeEditModal();
+  buildPatientList();
+  renderPatientDetail(selectedPatientId);
+}
+// Close modal on backdrop click
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+
+// ── URL HASH NAVIGATION ──
+function handleHash() {
+  const hash = window.location.hash.substring(1);
+  if (hash) {
+    const parts = hash.split('/');
+    const page = parts[0];
+    if (pages.includes(page)) {
+      switchPage(page);
+      if (page === 'clinician' && parts[1]) {
+        const patientId = parseInt(parts[1]);
+        if (!isNaN(patientId) && PATIENTS[patientId]) {
+          selectPatient(patientId);
+        }
+      }
+    }
+  }
+}
+window.addEventListener('load', handleHash);
+window.addEventListener('hashchange', handleHash);
+
+let tick=0;
+setInterval(()=>{
+  tick++;
+  const moisture=+(16+Math.sin(tick*0.1)*3+Math.random()*2).toFixed(1);
+  const pressure=+(42+Math.sin(tick*0.07)*5+Math.random()*4).toFixed(0);
+  const temp=+(34.2+Math.sin(tick*0.05)*0.4+Math.random()*0.2).toFixed(1);
+  const z3=+(54+Math.sin(tick*0.08)*6+Math.random()*4).toFixed(0);
+
+  // dashboard values
+  const mEl=document.getElementById('m-moisture');
+  const pEl=document.getElementById('m-pressure');
+  const tEl=document.getElementById('m-temp');
+  if(mEl) mEl.textContent=moisture+'%';
+  if(pEl) pEl.textContent=pressure+' mmHg';
+  if(tEl) tEl.textContent=temp+'°C';
+
+  // sensor page
+  ['s-moisture','s-pressure','s-temp'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=[moisture+'%',pressure+' mmHg',temp+'°C'][i];
+  });
+  const st=document.getElementById('st-curr');
+  if(st) st.textContent=temp+'°';
+
+  // zone 3
+  const bz3=document.getElementById('bar-z3');
+  const sz3=document.getElementById('sv-z3');
+  if(bz3) bz3.style.width=Math.min(z3,100)+'%';
+  if(sz3) sz3.textContent=z3;
+
+  // moisture bar
+  const bm=document.getElementById('bar-moisture');
+  const sm=document.getElementById('sv-moisture');
+  if(bm) bm.style.width=Math.min(moisture,100)+'%';
+  if(sm) sm.textContent=moisture+'%';
+},1800);
+</script>
+</body>
+</html>
